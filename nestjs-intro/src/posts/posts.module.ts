@@ -3,10 +3,13 @@ import { PostsController } from './posts.controller';
 import { PostsService } from './providers/posts.service';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from 'src/auth/providers/auth.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Post } from './post.entity';
+import { MetaOption } from 'src/meta-options/meta-option.entity';
 
 @Module({
   controllers: [PostsController],
   providers: [PostsService],
-  imports: [UsersModule],
+  imports: [UsersModule, TypeOrmModule.forFeature([Post, MetaOption])],
 })
 export class PostsModule {}

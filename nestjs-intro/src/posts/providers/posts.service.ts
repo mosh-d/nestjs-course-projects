@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/providers/users.service';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from '../post.entity';
+import { Repository } from 'typeorm';
+import { MetaOption } from 'src/meta-options/meta-option.entity';
 
 @Injectable()
 export class PostsService {
   constructor(
     // Injecting Users Service
     private readonly usersService: UsersService,
-  ){}
-  public findAll(userId: string) {
+    // Inject postsRepository
+    @InjectRepository(Post)
+    private readonly postsRepository: Repository<Post>,
+    // Inject metaOptionsRepository
+    @InjectRepository(MetaOption)
+    public readonly metaOptionsRepository: Repository<MetaOption>,
+  ) { }
+
+  // Creating new posts
+  public async create(@Body() createPostDto: CreatePostDto) {
+    // Create post
+    let post = this.postsRepository.create(createPostDto);
+
+    // return the post
+    return await this.postsRepository.save(post);
+  }
+  public async findAll(userId: string) {
     const user = this.usersService.findOneById(userId);
 
-    return [
-      {
-        user: user,
-        title: "Test Title",
-        content: "Test Content",
+    let posts = await this.postsRepository.find({
+      relations: {
+        metaOptions: true,
       },
-       {
-        user: user,
-        title: "Test Title 2",
-        content: "Test Content 2",
-      }
-    ]
+    });
+
+    return posts;
+  }
+
+  public async delete(id: number) {
+    // Delete the post
+    await this.postsRepository.delete(id);
+
+    // Confirmation
+    return {deleted: true, id };
   }
 }
