@@ -19,7 +19,7 @@ export class UsersService {
      * Injecting User repository into UsersService
      * */
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
@@ -34,11 +34,10 @@ export class UsersService {
 
     // Try to create a new user
     // - Handle Exceptions Later
-    let newUser = this.usersRepository.create(createUserDto);
-    newUser = await this.usersRepository.save(newUser);
+    const newUser = this.usersRepository.create(createUserDto);
 
     // Create the user
-    return newUser;
+    return this.usersRepository.save(newUser);
   }
 
   /**
@@ -46,7 +45,7 @@ export class UsersService {
    */
   public findAll(
     getUserParamDto: GetUsersParamDto,
-    limt: number,
+    limit: number,
     page: number,
   ) {
     return [
@@ -64,11 +63,9 @@ export class UsersService {
   /**
    * Public method used to find one user using the ID of the user
    */
-  public findOneById(id: string) {
-    return {
-      id: 1234,
-      firstName: 'Alice',
-      email: 'alice@doe.com',
-    };
+  public async findOneById(id: number) {
+    return this.usersRepository.findOneBy({
+      id,
+    });
   }
 }
